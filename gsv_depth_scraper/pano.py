@@ -9,7 +9,7 @@ now = datetime.datetime.now()
 URL_STR = 'http://maps.google.com/cbk?output=tile&panoid={panoid}&zoom={z}&x={x}&y={y}&key={key}&' + str(now.microsecond)
 
 GSV_TILEDIM = 512
-GSV_PANODIM = 416       
+GSV_PANODIM = 416
 GOOG_COPYRIGHT = "Google"
 
 
@@ -22,17 +22,17 @@ def load_panos_and_package_to_zip(pth_wrk, zipobj, fmt):
         if "{}.json".format(panoid) not in dpth_fnames:
             print("MISSING JSON FILE\nCould not find {} in working directory {}.\nThis pano will not be archived.".format("{}.json".format(panoid),pth_wrk))
             continue
-        
+
         zipobj.write(os.path.join(pth_wrk,pano_fname), os.path.join("pano_img",pano_fname)) # write pano image to zip archive
         pano_imgs.append(Image.open(os.path.join(pth_wrk,pano_fname))) # load pano image to memory
         panoids.append(panoid)
-    
+
     return panoids, pano_imgs
-    
+
 def panoid_to_img(panoid, api_key, zoom):
     w,h = 2**zoom, 2**(zoom-1)
     img = Image.new("RGB", (w*GSV_PANODIM, h*GSV_PANODIM), "red")
-    
+
     try:
         for y in range(h):
             for x in range(w):
@@ -43,7 +43,7 @@ def panoid_to_img(panoid, api_key, zoom):
     except:
         print("!!!! FAILED TO DOWNLOAD PANO for {}".format(panoid))
         return False
-    
+
     return img.transpose(Image.FLIP_LEFT_RIGHT)
 
 
@@ -55,20 +55,20 @@ def gpts_to_panoids(gjpts, api_key):
     }
     api_list = google_streetview.helpers.api_list(apiargs)
     results = google_streetview.api.results(api_list)
-        
+
     panoids = set()
     for meta in results.metadata:
         if not meta['status'] == "OK":
             print("NO PANORAMA FOUND FOR GIVEN LATLNG. status: {}".format(meta['status']))
             continue
-            
+
         if 'copyright' not in meta:
-            print("Found a panorama with no copyright tag. skipping this panorama as it likely doesn't have a depthmap.")
+            print("Found a panorama with no copyright tag. skipping.")
             continue
         else:
             if not ( meta['copyright'].split()[-1].lower() == GOOG_COPYRIGHT.lower() ):
-                print("Found a non-google copyright ({}). skipping this panorama as it likely doesn't have a depthmap.".format(meta['copyright']))
+                print("Found a non-google copyright ({}). skipping {}.".format(meta['copyright'], meta['pano_id']))
                 continue
-            
+
         panoids.add( meta['pano_id'] )
     return list(panoids)
