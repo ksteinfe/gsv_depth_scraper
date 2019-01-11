@@ -1,4 +1,5 @@
 import json, geojson
+import numpy
 # GeoJSON wants [longitude, latitude, elevation]
 
 def test_gpts():
@@ -25,3 +26,16 @@ def load_gpts(pth_fil):
     gpts = []
     for feat in feat_coll.features: gpts.extend(lnglats_to_gpts(list(geojson.utils.coords(feat))))
     return gpts
+    
+    
+def grid(cntr_latlng, dim_lat=0.01, dim_lng=0.01, cnt_lat=4, cnt_lng=4):
+    ctr_lat, ctr_lng = cntr_latlng[0],cntr_latlng[1]
+    feas = []
+    for x in range(cnt_lng):
+        lng = numpy.interp(x,(0.0,cnt_lng),(ctr_lng-dim_lng/2.0,ctr_lng+dim_lng/2.0))
+        for y in range(cnt_lat):
+            lat = numpy.interp(y,(0.0,cnt_lat),(ctr_lat-dim_lat/2.0,ctr_lat+dim_lat/2.0))
+            fea = geojson.Feature(geometry=geojson.Point((lng,lat)))
+            feas.append(fea)
+    feacoll = geojson.FeatureCollection(feas)
+    return feacoll

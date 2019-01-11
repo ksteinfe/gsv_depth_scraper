@@ -58,12 +58,17 @@ def gpts_to_panoids(gjpts, api_key):
         
     panoids = set()
     for meta in results.metadata:
-        if not ( meta['copyright'].split()[-1].lower() == GOOG_COPYRIGHT.lower() ):
-            print("Found a non-google copyright ({}). skipping this panorama as it likely doesn't have a depthmap.".format(meta['copyright']))
-            continue
         if not meta['status'] == "OK":
             print("NO PANORAMA FOUND FOR GIVEN LATLNG. status: {}".format(meta['status']))
             continue
+            
+        if 'copyright' not in meta:
+            print("Found a panorama with no copyright tag. skipping this panorama as it likely doesn't have a depthmap.")
+            continue
+        else:
+            if not ( meta['copyright'].split()[-1].lower() == GOOG_COPYRIGHT.lower() ):
+                print("Found a non-google copyright ({}). skipping this panorama as it likely doesn't have a depthmap.".format(meta['copyright']))
+                continue
             
         panoids.add( meta['pano_id'] )
     return list(panoids)

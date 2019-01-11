@@ -13,6 +13,7 @@ def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=Fal
         print("limiting loaded coords from {} to {}".format(len(gpts),limit))
         gpts = gpts[:limit]
     
+    print("getting panoids for {} sample locations".format(len(gpts)))
     panoids = gsv_depth_scraper.pano.gpts_to_panoids(gpts, api_key) # panoids are unique
     print("parsed {} sample locations and found {} unique panoids".format(len(gpts),len(panoids)))
     for n, panoid in enumerate(panoids):
