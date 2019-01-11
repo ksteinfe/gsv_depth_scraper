@@ -53,7 +53,7 @@ if __name__ == '__main__':
     # common parent for defining arguments for 'scrape' and 'both' modes
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser.add_argument('geojson', help="Path to a .geojson file that describes sample locations from which to find nearby Street View panoramas. Note that panorama locations are not identical to sample locations, and that not all sample locations will result in a valid panorama. Geojson should be structured as a FeatureCollection - all coordinates described by contained Features will be sampled. Conforming .geojson data may be created at http://geojson.io/", type=is_file)
-    parent_parser.add_argument('-delay', type=int, default=30, help="A delay in seconds between each subsequent call to the undocumented depthmap API. Limits on this undocumented API are not known. For small batches (around 20 panoramas), no delay appears to be required. For large batches, consider a range of 30-60 seconds.")
+    parent_parser.add_argument('-delay', type=int, default=60, help="A delay in seconds between each subsequent call to the undocumented depthmap API. Limits on this undocumented API are not known. For small batches (around 20 panoramas), no delay appears to be required. For large batches, consider a range of 30-60 seconds.")
     parent_parser.add_argument('-zoom', type=int, default=1, help="Zoom level at which to download photographic panoramas. Lower values are smaller images, higher values are larger. Maximum of 3 is recommended.")
     parent_parser.add_argument('-limit', type=int, default=-1, help="Limits the number of sample points processed for debugging purposes. A value of -1 (default) indicates no limit.")
 
