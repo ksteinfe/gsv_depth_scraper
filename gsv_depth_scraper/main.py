@@ -42,25 +42,39 @@ def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=Fal
 def panos_to_tile_package(pth_wrk, pth_zip, name, fmt="png"):
     
     # create ZIP archive object
-    zipobj = zipfile.ZipFile(pth_zip, 'w', zipfile.ZIP_DEFLATED)
+    zipobj_imgs = zipfile.ZipFile(pth_zip+"_imgs.zip", 'w', zipfile.ZIP_DEFLATED)
     
     print("loading panos from working directory and archiving: {}".format(pth_wrk))
-    panoids, pano_imgs = gsv_depth_scraper.pano.load_panos_and_package_to_zip(pth_wrk, zipobj, fmt)
+    panoids, pano_imgs = gsv_depth_scraper.pano.load_panos_and_package_to_zip(pth_wrk, zipobj_imgs, fmt)
     
-    print("creating images from depthmap data and archiving")
-    metadata, dpth_imgs = gsv_depth_scraper.dpth.load_dpths_and_package_to_zip(panoids, pth_wrk, zipobj)
+    #panoids = panoids[:2]
+    
+    print("creating depth images from depthmap data and archiving")
+    metadata, dpth_imgs = gsv_depth_scraper.dpth.load_dpths_and_package_to_zip(panoids, pth_wrk, zipobj_imgs)
+            
+    # close ZIP archive object
+    zipobj_imgs.close()
+    print("full image archive is complete: {}".format(pth_zip+"_imgs.zip"))
+    
             
     pair_count = len(panoids)
     print("cutting tiles for {} depthpanos".format(pair_count))
     
+    # create ZIP archive object
+    zipobj_tils = zipfile.ZipFile(pth_zip+"_tils.zip", 'w', zipfile.ZIP_DEFLATED)
+    
     for n, (panoid, pano_img, dpth_img) in enumerate(zip(panoids, pano_imgs, dpth_imgs)):
         #panoid, pano_img, dpth_img = item[0], item[1]['pano'], item[1]['dpth']
         tic = time.clock()
-        gsv_depth_scraper.xform.cut_tiles_and_package_to_zip(dpth_img, "dpth", panoid, zipobj, fmt, gsv_depth_scraper.xform.face_size(pano_img))
-        gsv_depth_scraper.xform.cut_tiles_and_package_to_zip(pano_img, "pano", panoid, zipobj, fmt)
+        # gsv_depth_scraper.xform.cut_tiles_and_package_to_zip(dpth_img, "dpth", panoid, zipobj, fmt, gsv_depth_scraper.xform.face_size(pano_img))
+        gsv_depth_scraper.xform.cut_tiles_and_package_to_zip(dpth_img, "dpth", panoid, zipobj_tils, fmt)
+        gsv_depth_scraper.xform.cut_tiles_and_package_to_zip(pano_img, "pano", panoid, zipobj_tils, fmt)
         toc = time.clock()
         dur = int(toc-tic)
         print("cutting tiles for {} ({}/{}) took {}s. at this rate, {}s ({:.2f}m) to go.".format(panoid, n+1, pair_count, dur, (pair_count-(n+1))*dur, ((pair_count-(n+1))*dur)/60.0 ))
+    
+    # close ZIP archive object
+    zipobj_tile.close()
     
     print("packaged {} depthpanos to {}.\nthe working directory may now be deleted: {}".format(pair_count, pth_zip, pth_wrk))
 
@@ -68,7 +82,7 @@ def panos_to_tile_package(pth_wrk, pth_zip, name, fmt="png"):
 
 def _prepare_working_directory(dir, name, delete_existing=False):
     pth_dest = os.path.join(dir, name)
-    pth_zip = os.path.join(dir,"{}.zip".format(name))
+    pth_zip = os.path.join(dir,"{}".format(name))
     
     if delete_existing:
         if not os.path.isdir(pth_dest): os.mkdir(pth_dest)

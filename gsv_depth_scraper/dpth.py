@@ -26,7 +26,9 @@ def load_dpths_and_package_to_zip(panoids, pth_dpth, zipobj):
         for panoid in panoids:
             # get depth information
             dpth_resp = False 
-            with open(os.path.join(pth_dpth,'{}.json'.format(panoid))) as f: dpth_resp = json.load(f)
+            with open(os.path.join(pth_dpth,'{}.json'.format(panoid))) as f: 
+                dpth_resp = json.load(f) # read dpth_resp from file
+                zipobj.write(os.path.join(pth_dpth,'{}.json'.format(panoid)), os.path.join("json_rsp",'{}.json'.format(panoid))) # write dpth_resp to zip archive
             if not dpth_resp: raise Exception("THIS SHOULDN'T HAPPEN!\nCould not parse depth info file:{}".format(panoid))
             
             metadata[panoid], dpth_inf = process_depth_resp(panoid, dpth_resp) # decodes stored depth information and extracts useful metadata
@@ -41,7 +43,7 @@ def load_dpths_and_package_to_zip(panoids, pth_dpth, zipobj):
         for dpth_fname in os.listdir(pth_tmp):
             zipobj.write(os.path.join(pth_tmp,dpth_fname), os.path.join("dpth_img",dpth_fname))
             
-        # write metadata to zip archive
+        # write summary metadata to zip archive
         pth_meta = os.path.join(pth_tmp,'meta.json')
         with open(pth_meta, 'w') as f: json.dump(metadata, f, separators=(',', ':'))
         zipobj.write(pth_meta, 'meta.json')
