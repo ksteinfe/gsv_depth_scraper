@@ -58,7 +58,7 @@ def _tiles_from_equirectangular(img):
         threads.append( thrd )
 
     for i in range(len(threads)): threads[i].join()
-    dur = int(time.clock()-tic)
+    #dur = int(time.clock()-tic)
     #print(ret)
 
     #if did_calc: print("rotation of {} took {}s and required a calculation".format(rot, dur))
