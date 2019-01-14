@@ -16,6 +16,8 @@ def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=Fal
     print("getting panoids for {} sample locations".format(len(gpts)))
     panoids = gsv_depth_scraper.pano.gpts_to_panoids(gpts, api_key) # panoids are unique
     print("parsed {} sample locations and found {} unique panoids".format(len(gpts),len(panoids)))
+    
+    mapplot_data = {}
     for n, panoid in enumerate(panoids):
         pano_img = gsv_depth_scraper.pano.panoid_to_img(panoid, api_key, zoom)
         if not pano_img: continue
@@ -27,6 +29,9 @@ def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=Fal
             pano_img.save(os.path.join(pth_wrk,"{}.{}".format(panoid,fmt))) # save pano
             with open(os.path.join(pth_wrk,'{}.json'.format(panoid)), 'w') as f:
                 json.dump(dpth_inf, f, separators=(',', ':')) # save depth data
+                
+            #print(dpth_inf)
+            mapplot_data[panoid] = {"lat":dpth_inf['Location']['lat'], "lng":dpth_inf['Location']['lng']}
         else:
             print("!!!! FAILED\t{}".format(panoid))
         if delay:
@@ -34,6 +39,11 @@ def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=Fal
             print("... pausing for {0:.2f}s".format(delay + jitter))
             time.sleep(delay + jitter)
 
+    gsv_depth_scraper.pano.plot_map(mapplot_data, pth_wrk, api_key)
+    
+    with open(os.path.join(pth_wrk,"_result_locs.geojson"), 'w') as f:
+        json.dump(gsv_depth_scraper.geom.locs_to_geojson(mapplot_data, pth_wrk), f, separators=(',', ':')) # save results  
+    
     return True
 
 # --------------------

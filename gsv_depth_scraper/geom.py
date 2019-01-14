@@ -27,6 +27,16 @@ def load_gpts(pth_fil):
     for feat in feat_coll.features: gpts.extend(lnglats_to_gpts(list(geojson.utils.coords(feat))))
     return gpts
     
+# given a dict of dicts as "key": {"":val, "":val}, constructs a geojson featurecollection
+def locs_to_geojson(locs, pth_fil):
+    feas = []
+    for key, item in locs.items():
+        fea = geojson.Feature(geometry=geojson.Point((float(item['lng']),float(item['lat']))))
+        feas.append(fea)
+    feacoll = geojson.FeatureCollection(feas)
+    return feacoll
+    
+    
     
 def grid(cntr_latlng, dim_lat=0.01, dim_lng=0.01, cnt_lat=4, cnt_lng=4):
     ctr_lat, ctr_lng = cntr_latlng[0],cntr_latlng[1]
