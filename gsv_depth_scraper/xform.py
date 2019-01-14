@@ -13,7 +13,7 @@ XFORM_TBL = {}
 def cut_tiles_and_package_to_zip(img, layer, panoid, zipobj, fmt, resize_to=False):
     print("{} {}".format(panoid, layer))
     tiles = _tiles_from_equirectangular(img) # a nested dict of rots and facs
-    
+
     # resize and prepare filenames
     fns, tis = [],[]
     for rot, faces in tiles.items():
@@ -21,27 +21,27 @@ def cut_tiles_and_package_to_zip(img, layer, panoid, zipobj, fmt, resize_to=Fals
             if resize_to: img = img.resize((resize_to,resize_to), Image.ANTIALIAS)
             tis.append(img)
             fns.append("{}_{}_{}.{}".format(panoid,rot,fac,fmt))
-            
-    with tempfile.TemporaryDirectory() as pth_tmp:   
+
+    with tempfile.TemporaryDirectory() as pth_tmp:
         for fn, ti in zip(fns, tis):
-            ti.save(os.path.join(pth_tmp,fn)) # save img to temp folder    
-            
+            ti.save(os.path.join(pth_tmp,fn)) # save img to temp folder
+
         # write images to zip archive
         for fname in os.listdir(pth_tmp):
             zipobj.write(os.path.join(pth_tmp,fname), os.path.join("{}_til".format(layer),fname))
-    
+
     '''
     with tempfile.TemporaryDirectory() as pth_tmp:
         for rot, faces in tiles.items():
             for fac, img in faces.items():
                 if resize_to: img = img.resize((resize_to,resize_to), Image.ANTIALIAS)
                 img.save(os.path.join(pth_tmp,"{}_{}_{}_{}.{}".format(panoid,layer,rot,fac,fmt))) # save img to temp folder
-                
+
         # write images to zip archive
         for fname in os.listdir(pth_tmp):
             zipobj.write(os.path.join(pth_tmp,fname), os.path.join("{}_til".format(layer),fname))
     '''
-    
+
 
 def _tiles_from_equirectangular(img):
     # we could alter rotations here if desired
@@ -55,56 +55,56 @@ def _tiles_from_equirectangular(img):
         else:
             ret[key], did_calc = _faces_from_equirectangular(_rotate_equirectangular(img, rot))
         dur = int(time.clock()-tic)
-        
+
         if did_calc: print("rotation of {} took {}s and required a calculation".format(rot, dur))
         else: print("rotation of {} took {}s and required no calculation".format(rot, dur))
-    
+
     return ret
 
 
 def _faces_from_equirectangular(img_eqrc):
     img_cmap = Image.new("RGB",(img_eqrc.size[0],int(img_eqrc.size[0]*3/4)),"black")
     did_calc = _convert_back(img_eqrc,img_cmap)
-        
+
     dim = face_size(img_eqrc)
     box = (0,0,dim,dim)
     tile_top = Image.new(img_cmap.mode,(dim,dim),color=None)
-    tile_top.paste( img_cmap.crop((dim*2,0,dim*3,dim)), box ) 
-    
+    tile_top.paste( img_cmap.crop((dim*2,0,dim*3,dim)), box )
+
     tile_bottom = Image.new(img_cmap.mode,(dim,dim),color=None)
-    tile_bottom.paste( img_cmap.crop((dim*2,dim*2,dim*3,dim*3)), box ) 
-    
+    tile_bottom.paste( img_cmap.crop((dim*2,dim*2,dim*3,dim*3)), box )
+
     tile_back = Image.new(img_cmap.mode,(dim,dim),color=None)
-    tile_back.paste( img_cmap.crop((0,dim,dim,dim*2)), box )     
-    
+    tile_back.paste( img_cmap.crop((0,dim,dim,dim*2)), box )
+
     tile_right = Image.new(img_cmap.mode,(dim,dim),color=None)
-    tile_right.paste( img_cmap.crop((dim,dim,dim*2,dim*2)), box ) 
-    
+    tile_right.paste( img_cmap.crop((dim,dim,dim*2,dim*2)), box )
+
     tile_front = Image.new(img_cmap.mode,(dim,dim),color=None)
-    tile_front.paste( img_cmap.crop((dim*2,dim,dim*3,dim*2)), box ) 
-    
+    tile_front.paste( img_cmap.crop((dim*2,dim,dim*3,dim*2)), box )
+
     tile_left = Image.new(img_cmap.mode,(dim,dim),color=None)
-    tile_left.paste( img_cmap.crop((dim*3,dim,dim*4,dim*2)), box ) 
-        
+    tile_left.paste( img_cmap.crop((dim*3,dim,dim*4,dim*2)), box )
+
     return {"top":tile_top,"btm":tile_bottom,"bck":tile_back,"rht":tile_right,"fnt":tile_front,"lft":tile_left}, did_calc
 
 def face_size(img_eqrc):
     return int(img_eqrc.size[0]/4)
-    
+
 # rotates an equirectangular image
 # rot is the amount of rotation, given in terms of integer number of divisions of a circle
-# rot=12=30deg; rot=8=45deg; rot=6=60deg; rot=4=90deg 
+# rot=12=30deg; rot=8=45deg; rot=6=60deg; rot=4=90deg
 def _rotate_equirectangular(img_src, rot=8):
     img_tar = Image.new(img_src.mode,img_src.size,color=None)
     fmt = img_src.format
     w,h = img_src.size
     div = int(w/8) # amount to rotate
-    
-    img_tar.paste( img_src.crop((0,0,div,h)), (w-div,0,w,h) ) 
-    img_tar.paste( img_src.crop((div,0,w,h)), (0,0,w-div,h) ) 
+
+    img_tar.paste( img_src.crop((0,0,div,h)), (w-div,0,w,h) )
+    img_tar.paste( img_src.crop((div,0,w,h)), (0,0,w-div,h) )
     return img_tar
-    
-# adapted from https://gist.github.com/muminoff/25f7a86f28968eb89a4b722e960603fe    
+
+# adapted from https://gist.github.com/muminoff/25f7a86f28968eb89a4b722e960603fe
 # get x,y,z coords from out image pixels coords
 # i,j are pixel coords
 # face is face number
@@ -126,28 +126,28 @@ def _out_img_to_xyz(i,j,face,edge):
         (x,y,z) = (5.0-b, a-5.0, -1.0)
     return (x,y,z)
 
-    
-def _xyz_to_params(x,y,z,e):
-    if (x,y,z,e) in XFORM_TBL:
-        return XFORM_TBL[(x,y,z,e)], False
-    
+# wrote this to speed up trig calculations, but using the lookup table doesn't help
+def _xyz_to_params(x,y,z,e, use_table=False):
+    if use_table:
+        if (x,y,z,e) in XFORM_TBL: return XFORM_TBL[(x,y,z,e)], False
+
     theta = math.atan2(y,x) # range -pi to pi
     r = math.hypot(x,y)
     phi = math.atan2(z,r) # range -pi/2 to pi/2
     # source img coords
     uf = ( 2.0*e*(theta + math.pi)/math.pi )
     vf = ( 2.0*e * (math.pi/2 - phi)/math.pi)
-    
+
     ui = math.floor(uf)  # coord of pixel to bottom left
     vi = math.floor(vf)
     u2 = ui+1       # coords of pixel to top right
     v2 = vi+1
     mu = uf-ui      # fraction of way across pixel
     nu = vf-vi
-    
-    XFORM_TBL[(x,y,z,e)] = (uf,vf)
+
+    if use_table: XFORM_TBL[(x,y,z,e)] = (ui,vi,u2,v2,mu,nu)
     return (ui,vi,u2,v2,mu,nu), True
-    
+
 # adapted from https://gist.github.com/muminoff/25f7a86f28968eb89a4b722e960603fe
 # convert using an inverse transformation
 def _convert_back(imgIn,imgOut):
@@ -168,11 +168,11 @@ def _convert_back(imgIn,imgOut):
             if j<edge: face2 = 4 # top
             elif j>=2*edge: face2 = 5 # bottom
             else: face2 = face
-            
+
             (x,y,z) = _out_img_to_xyz(i,j,face2,edge)
-            (ui,vi,u2,v2,mu,nu), calced = _xyz_to_params(x,y,z,edge)
+            (ui,vi,u2,v2,mu,nu), calced = _xyz_to_params(x,y,z,edge,False)
             if calced: did_ufvf_calc = True
-            
+
             # Use bilinear interpolation between the four surrounding pixels
             A = inPix[ui % inSize[0],int(clip(vi,0,inSize[1]-1))]
             B = inPix[u2 % inSize[0],int(clip(vi,0,inSize[1]-1))]
@@ -185,6 +185,5 @@ def _convert_back(imgIn,imgOut):
               A[2]*(1-mu)*(1-nu) + B[2]*(mu)*(1-nu) + C[2]*(1-mu)*nu+D[2]*mu*nu )
 
             outPix[i,j] = (int(round(r)),int(round(g)),int(round(b)))
-            
-    return did_ufvf_calc
 
+    return did_ufvf_calc
