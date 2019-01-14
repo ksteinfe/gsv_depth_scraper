@@ -31,20 +31,8 @@ def cut_tiles_and_package_to_zip(img, layer, panoid, zipobj, fmt, resize_to=Fals
         for fname in os.listdir(pth_tmp):
             zipobj.write(os.path.join(pth_tmp,fname), os.path.join("{}_til".format(layer),fname))
 
-    '''
-    with tempfile.TemporaryDirectory() as pth_tmp:
-        for rot, faces in tiles.items():
-            for fac, img in faces.items():
-                if resize_to: img = img.resize((resize_to,resize_to), Image.ANTIALIAS)
-                img.save(os.path.join(pth_tmp,"{}_{}_{}_{}.{}".format(panoid,layer,rot,fac,fmt))) # save img to temp folder
 
-        # write images to zip archive
-        for fname in os.listdir(pth_tmp):
-            zipobj.write(os.path.join(pth_tmp,fname), os.path.join("{}_til".format(layer),fname))
-    '''
-
-
-def _tiles_from_equirectangular(img):
+def _tiles_from_equirectangular(img, do_multithread=False):
     # we could alter rotations here if desired
     rots = [0,12,6]  # rot of 12 = 30deg; rot of 6 = 60deg
     ret = {}
@@ -52,18 +40,19 @@ def _tiles_from_equirectangular(img):
     for rot in rots:
         key = '{:02d}'.format(rot)
         img_rot = _rotate_equirectangular(img, rot)
-        #ret[key], did_calc = _faces_from_equirectangular(img_rot)
-        thrd = threading.Thread(target=_faces_from_equirectangular, args=(img_rot,ret,key))
-        thrd.start()
-        threads.append( thrd )
+        if do_multithread:
+            thrd = threading.Thread(target=_faces_from_equirectangular, args=(img_rot,ret,key))
+            thrd.start()
+            threads.append( thrd )
+        else:
+            _faces_from_equirectangular(img_rot,ret,key)
 
-    for i in range(len(threads)): threads[i].join()
+    if do_multithread:
+            for i in range(len(threads)): threads[i].join()
     #dur = int(time.clock()-tic)
     #print(ret)
-
     #if did_calc: print("rotation of {} took {}s and required a calculation".format(rot, dur))
     #else: print("rotation of {} took {}s and required no calculation".format(rot, dur))
-
     return ret
 
 

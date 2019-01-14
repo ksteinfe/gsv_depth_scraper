@@ -4,6 +4,9 @@ import gsv_depth_scraper.main
 
 def main(args):
     print("========\nRunning in '{}' mode.".format(args.mode))
+    limit = args.limit
+    if limit <0: limit = False
+
     if args.mode == "scrape" or args.mode == "scrape_and_process":
         name = os.path.splitext(ntpath.basename(args.geojson))[0]
         pth_wrk, pth_zip = gsv_depth_scraper.main._prepare_working_directory(args.dir, name, args.mode == "scrape" or args.mode == "scrape_and_process")
@@ -12,14 +15,12 @@ def main(args):
         pth_wrk, pth_zip = gsv_depth_scraper.main._prepare_working_directory(args.dir, args.name)
 
     if args.mode == "scrape" or args.mode == "scrape_and_process":
-        limit = args.limit
-        if limit <0: limit = False
         print("Scraping...\nname: {}\t zoom: {}\t delay: {}\t limit: {}\n========".format(name, args.zoom, args.delay, limit))
         gsv_depth_scraper.main.gjpts_to_panos(args.geojson, args.key, pth_wrk, name, zoom=args.zoom, delay=args.delay, limit=limit)
     if args.mode == "scrape_and_process": print("========")
     if args.mode == "process" or args.mode == "scrape_and_process":
         print("Processing...\nname: {}\n========".format(name))
-        gsv_depth_scraper.main.panos_to_tile_package(pth_wrk, pth_zip, name)
+        gsv_depth_scraper.main.panos_to_package(pth_wrk, pth_zip, name, do_tile=args.do_tile, limit=limit)
 
 
 if __name__ == '__main__':
@@ -66,8 +67,11 @@ if __name__ == '__main__':
 
     parser_scrape = subparsers.add_parser('scrape', parents=[parent_parser], help="Scrape mode. Given a .geojson file containing coordinate locations, finds nearby Google Street View panoramas, and downloads both panoramic images and depth information to a defined working directory. Since this uses a combination of documented and undocumented APIs, scraping is designed to take a long time to avoid getting our IP address banned.")
     parser_both = subparsers.add_parser('scrape_and_process', parents=[parent_parser], help="Performs both scrape and process operations.")
+
     parser_process = subparsers.add_parser('process', help="Process mode. Given panoramic images and depth information saved to a defined working directory, for each panorama a corresponding depthmap image is created. This pair of depthmap and photographic panorama are then cut into tiles and packaged into a ZIP file.")
     parser_process.add_argument('name', help="The name of the subfolder of the working directory that contains the already-downloaded pano and depth data.")
+    parser_process.add_argument('-limit', type=int, default=-1, help="Limits the number of panos processed for debugging purposes. A value of -1 (default) indicates no limit.")
+    parser_process.add_argument('-do_tile', action='store_true', default=False)
 
     args = parser.parse_args()
 
