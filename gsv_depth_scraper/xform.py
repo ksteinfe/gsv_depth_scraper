@@ -1,4 +1,5 @@
 import tempfile, os, time
+import threading
 from PIL import Image
 #from math import pi,sin,cos,tan,atan2,hypot,floor
 import math
@@ -46,23 +47,28 @@ def cut_tiles_and_package_to_zip(img, layer, panoid, zipobj, fmt, resize_to=Fals
 def _tiles_from_equirectangular(img):
     # we could alter rotations here if desired
     rots = [0,12,6]  # rot of 12 = 30deg; rot of 6 = 60deg
-    tic = time.clock()
     ret = {}
+    threads = []
     for rot in rots:
         key = '{:02d}'.format(rot)
-        if rot==0:
-            ret[key], did_calc = _faces_from_equirectangular(img)
-        else:
-            ret[key], did_calc = _faces_from_equirectangular(_rotate_equirectangular(img, rot))
-        dur = int(time.clock()-tic)
+        img_rot = _rotate_equirectangular(img, rot)
+        #ret[key], did_calc = _faces_from_equirectangular(img_rot)
+        thrd = threading.Thread(target=_faces_from_equirectangular, args=(img_rot,ret,key))
+        thrd.start()
+        threads.append( thrd )
 
-        if did_calc: print("rotation of {} took {}s and required a calculation".format(rot, dur))
-        else: print("rotation of {} took {}s and required no calculation".format(rot, dur))
+    for i in range(len(threads)): threads[i].join()
+    dur = int(time.clock()-tic)
+    #print(ret)
+
+    #if did_calc: print("rotation of {} took {}s and required a calculation".format(rot, dur))
+    #else: print("rotation of {} took {}s and required no calculation".format(rot, dur))
 
     return ret
 
 
-def _faces_from_equirectangular(img_eqrc):
+def _faces_from_equirectangular(img_eqrc, ret, key):
+    tic = time.clock()
     img_cmap = Image.new("RGB",(img_eqrc.size[0],int(img_eqrc.size[0]*3/4)),"black")
     did_calc = _convert_back(img_eqrc,img_cmap)
 
@@ -86,7 +92,10 @@ def _faces_from_equirectangular(img_eqrc):
     tile_left = Image.new(img_cmap.mode,(dim,dim),color=None)
     tile_left.paste( img_cmap.crop((dim*3,dim,dim*4,dim*2)), box )
 
-    return {"top":tile_top,"btm":tile_bottom,"bck":tile_back,"rht":tile_right,"fnt":tile_front,"lft":tile_left}, did_calc
+    ret[key] = {"top":tile_top,"btm":tile_bottom,"bck":tile_back,"rht":tile_right,"fnt":tile_front,"lft":tile_left}
+    dur = int(time.clock()-tic)
+    print("face extraction {} took {}s".format(key, dur))
+    return True
 
 def face_size(img_eqrc):
     return int(img_eqrc.size[0]/4)
@@ -94,7 +103,8 @@ def face_size(img_eqrc):
 # rotates an equirectangular image
 # rot is the amount of rotation, given in terms of integer number of divisions of a circle
 # rot=12=30deg; rot=8=45deg; rot=6=60deg; rot=4=90deg
-def _rotate_equirectangular(img_src, rot=8):
+def _rotate_equirectangular(img_src, rot=0):
+    if rot==0: return img_src.copy()
     img_tar = Image.new(img_src.mode,img_src.size,color=None)
     fmt = img_src.format
     w,h = img_src.size

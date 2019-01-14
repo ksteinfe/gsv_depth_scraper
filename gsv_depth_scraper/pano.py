@@ -13,10 +13,11 @@ GSV_PANODIM = 416
 GOOG_COPYRIGHT = "Google"
 
 
-def load_panos_and_package_to_zip(pth_wrk, zipobj, fmt):
+def load_panos_and_package_to_zip(pth_wrk, zipobj, fmt, limit=False):
     panoids, pano_imgs = [], []
     pano_fnames = [file for file in os.listdir(pth_wrk) if file.endswith(fmt)]
     dpth_fnames = [file for file in os.listdir(pth_wrk) if file.endswith("json")]
+    if limit: pano_fnames = pano_fnames[:limit]
     for pano_fname in pano_fnames:
         panoid = os.path.splitext(pano_fname)[0]
         if "{}.json".format(panoid) not in dpth_fnames:
