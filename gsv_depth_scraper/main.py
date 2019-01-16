@@ -52,24 +52,24 @@ def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=Fal
 def panos_to_package(pth_wrk, pth_zip, name, do_tile=False, fmt="png", limit=False):
 
     # create ZIP archive object
-    zipobj_imgs = zipfile.ZipFile(pth_zip+"_imgs.zip", 'w', zipfile.ZIP_DEFLATED)
+    zipobj_imgs = zipfile.ZipFile(os.path.join(pth_zip,"{}_imgs.zip".format(name)), 'w', zipfile.ZIP_DEFLATED)
 
     print("loading panos from working directory and archiving: {}".format(pth_wrk))
     panoids, pano_imgs = gsv_depth_scraper.pano.load_panos_and_package_to_zip(pth_wrk, zipobj_imgs, fmt, limit)
     pair_count = len(panoids)
 
     print("creating depth images from depthmap data and archiving")
-    metadata, dpth_imgs = gsv_depth_scraper.dpth.load_dpths_and_package_to_zip(panoids, pth_wrk, zipobj_imgs)
+    metadata, dpth_imgs = gsv_depth_scraper.dpth.load_dpths_and_package_to_zip(name, panoids, pth_wrk, zipobj_imgs, pth_zip)
 
     # close ZIP archive object
     zipobj_imgs.close()
-    print("full image archive is complete: {}".format(pth_zip+"_imgs.zip"))
+    print("full image archive is complete: {}".format(os.path.join(pth_zip,"{}_imgs.zip".format(name))))
 
     if do_tile:
         print("cutting tiles for {} depthpanos".format(pair_count))
 
         # create ZIP archive object
-        zipobj_tils = zipfile.ZipFile(pth_zip+"_tils.zip", 'w', zipfile.ZIP_DEFLATED)
+        zipobj_tils = zipfile.ZipFile(os.path.join(pth_zip,"{}_tils.zip".format(name)), 'w', zipfile.ZIP_DEFLATED)
 
         for n, (panoid, pano_img, dpth_img) in enumerate(zip(panoids, pano_imgs, dpth_imgs)):
             #panoid, pano_img, dpth_img = item[0], item[1]['pano'], item[1]['dpth']
@@ -90,7 +90,8 @@ def panos_to_package(pth_wrk, pth_zip, name, do_tile=False, fmt="png", limit=Fal
 
 def _prepare_working_directory(dir, name, delete_existing=False):
     pth_dest = os.path.join(dir, name)
-    pth_zip = os.path.join(dir,"{}".format(name))
+    #pth_zip = os.path.join(dir,"{}".format(name))
+    pth_zip = dir
 
     if delete_existing:
         if not os.path.isdir(pth_dest): os.mkdir(pth_dest)
