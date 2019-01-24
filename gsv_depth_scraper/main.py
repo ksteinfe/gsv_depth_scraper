@@ -6,7 +6,7 @@ import gsv_depth_scraper.pano, gsv_depth_scraper.dpth, gsv_depth_scraper.xform, 
 # --------------------
 # "scrape" mode
 # --------------------
-def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=False, limit=False):
+def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=False, limit=False, mapbox_key=False):
     print("loading coords from geojson: {}".format(pth_geo))
     gpts = gsv_depth_scraper.geom.load_gpts(pth_geo)
     if limit:
@@ -39,10 +39,12 @@ def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=Fal
             print("... pausing for {0:.2f}s".format(delay + jitter))
             time.sleep(delay + jitter)
 
-    gsv_depth_scraper.pano.plot_map(mapplot_data, pth_wrk, api_key)
+    mapplot_geojson = gsv_depth_scraper.geom.locs_to_geojson(mapplot_data)
+    if mapbox_key:
+        gsv_depth_scraper.geom.plot_map(mapplot_geojson, pth_wrk, mapbox_key)
     
     with open(os.path.join(pth_wrk,"_result_locs.geojson"), 'w') as f:
-        json.dump(gsv_depth_scraper.geom.locs_to_geojson(mapplot_data, pth_wrk), f, separators=(',', ':')) # save results  
+        json.dump(mapplot_geojson, f, separators=(',', ':')) # save results  
     
     return True
 

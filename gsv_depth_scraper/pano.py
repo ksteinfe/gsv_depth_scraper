@@ -36,15 +36,7 @@ def load_panos_and_package_to_zip(pth_wrk, zipobj, fmt, limit=False):
         panoids.append(panoid)
 
     return panoids, pano_imgs
-
-    
-def plot_map(mapplot_data, pth_wrk, api_key):
-    
-    
-    print("MAP PLOTTING IS A WORK IN PROGRESS")
-    return False
-    
-    
+   
     
 def panoid_to_img(panoid, api_key, zoom, size_img):
     w,h = 2**zoom, 2**(zoom-1)

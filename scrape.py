@@ -16,7 +16,7 @@ def main(args):
 
     if args.mode == "scrape" or args.mode == "scrape_and_process":
         print("Scraping...\nname: {}\t zoom: {}\t delay: {}\t limit: {}\n========".format(name, args.zoom, args.delay, limit))
-        gsv_depth_scraper.main.gjpts_to_panos(args.geojson, args.key, pth_wrk, name, zoom=args.zoom, delay=args.delay, limit=limit)
+        gsv_depth_scraper.main.gjpts_to_panos(args.geojson, args.key, pth_wrk, name, zoom=args.zoom, delay=args.delay, limit=limit, mapbox_key=args.mapbox_key)
     if args.mode == "scrape_and_process": print("========")
     if args.mode == "process" or args.mode == "scrape_and_process":
         print("Processing...\nname: {}\n========".format(name))
@@ -34,7 +34,11 @@ if __name__ == '__main__':
         raise Exception("Working directory defined in configuration file is not a directory: {}".format(config['DEFAULT']['dir']))
     else:
         config['DEFAULT']['dir'] = os.path.abspath(os.path.realpath(os.path.expanduser(config['DEFAULT']['dir'])))
-
+    
+    mapbox_key = False
+    if 'mapbox_key' in config['DEFAULT'] and len(config['DEFAULT']['mapbox_key']) > 10:
+        mapbox_key = config['DEFAULT']['mapbox_key']
+    
     """Checks if a path is an actual directory"""
     def is_dir(pth):
         if not os.path.isdir(pth):
@@ -78,4 +82,5 @@ if __name__ == '__main__':
     # add in configuration variables to arguments
     args.dir = config['DEFAULT']['dir']
     args.key = config['DEFAULT']['key']
+    args.mapbox_key = mapbox_key
     main(args)
