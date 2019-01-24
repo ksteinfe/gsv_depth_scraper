@@ -20,7 +20,7 @@ def main(args):
     if args.mode == "scrape_and_process": print("========")
     if args.mode == "process" or args.mode == "scrape_and_process":
         print("Processing...\nname: {}\n========".format(name))
-        gsv_depth_scraper.main.panos_to_package(pth_wrk, pth_zip, name, do_tile=args.do_tile, limit=limit)
+        gsv_depth_scraper.main.panos_to_package(pth_wrk, pth_zip, name, do_tile=args.do_tile, limit=limit, mapbox_key=args.mapbox_key)
 
 
 if __name__ == '__main__':

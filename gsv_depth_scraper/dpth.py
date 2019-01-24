@@ -42,13 +42,7 @@ def load_dpths_and_package_to_zip(name, panoids, pth_dpth, zipobj, pth_zip):
         # write dpth images to zip archive    
         for dpth_fname in os.listdir(pth_tmp):
             zipobj.write(os.path.join(pth_tmp,dpth_fname), os.path.join("dpth_img",dpth_fname))
-            
-        # write summary metadata to same folder as zip archive
-        pth_meta = os.path.join(pth_zip,'{}_results.json'.format(name))
-        print(pth_meta)
-        with open(pth_meta, 'w') as f: json.dump(metadata, f, separators=(',', ':'))
-        #zipobj.write(pth_meta, '{}_results.json'.format(name))
-    
+                
     print("depthmap data processing complete. max depth found was {}".format(max_depth_found))
     if max_depth_found >= max_depth_config:
         print("!!!! MAXIMUM DEPTH EXCEEDED: expect to find some error-colored pixels in this batch of depthmaps.")

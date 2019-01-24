@@ -41,9 +41,10 @@ def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=Fal
 
     mapplot_geojson = gsv_depth_scraper.geom.locs_to_geojson(mapplot_data)
     if mapbox_key:
-        gsv_depth_scraper.geom.plot_map(mapplot_geojson, pth_wrk, mapbox_key)
+        pth_map = os.path.join(pth_wrk,"__map.html")
+        gsv_depth_scraper.geom.plot_map(mapplot_geojson, pth_map, mapbox_key, True)
     
-    with open(os.path.join(pth_wrk,"_result_locs.geojson"), 'w') as f:
+    with open(os.path.join(pth_wrk,"__result_locs.geojson"), 'w') as f:
         json.dump(mapplot_geojson, f, separators=(',', ':')) # save results  
     
     return True
@@ -51,7 +52,7 @@ def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=Fal
 # --------------------
 # "process" mode
 # --------------------
-def panos_to_package(pth_wrk, pth_zip, name, do_tile=False, fmt="png", limit=False):
+def panos_to_package(pth_wrk, pth_zip, name, do_tile=False, fmt="png", limit=False, mapbox_key=False):
 
     # create ZIP archive object
     zipobj_imgs = zipfile.ZipFile(os.path.join(pth_zip,"{}_imgs.zip".format(name)), 'w', zipfile.ZIP_DEFLATED)
@@ -67,6 +68,13 @@ def panos_to_package(pth_wrk, pth_zip, name, do_tile=False, fmt="png", limit=Fal
     zipobj_imgs.close()
     print("full image archive is complete: {}".format(os.path.join(pth_zip,"{}_imgs.zip".format(name))))
 
+    # write summary metadata and map
+    with open(os.path.join(pth_zip,'{}_results.json'.format(name)), 'w') as f: json.dump(metadata, f, separators=(',', ':'))
+    mapplot_geojson = gsv_depth_scraper.geom.locs_to_geojson(metadata)
+    if mapbox_key:
+        pth_map = os.path.join(pth_zip,"{}_map.html".format(name))
+        gsv_depth_scraper.geom.plot_map(mapplot_geojson, pth_map, mapbox_key, False)    
+    
     if do_tile:
         print("cutting tiles for {} depthpanos".format(pair_count))
 

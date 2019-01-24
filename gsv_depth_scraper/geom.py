@@ -50,9 +50,11 @@ def locs_to_geojson(locs):
     feacoll = geojson.FeatureCollection(feas)
     return feacoll   
     
-def plot_map(geojson_feas, pth_wrk, mapbox_key):    
+def plot_map(geojson_feas, pth_save, mapbox_key, popup_image=False):    
     html_template = False
-    with open(os.path.join(os.path.dirname(__file__),'..','templates','map.html'), 'r') as f:
+    fname = 'map_noimg.html'
+    if popup_image: fname = 'map_img.html'
+    with open(os.path.join(os.path.dirname(__file__),'..','templates',fname), 'r') as f:
         html_template = f.read()
     if not html_template:
         print("FAILED TO LOAD HTML TEMPLATE:\t{}".format(os.path.join(os.path.dirname(__file__),'..','templates','map.html')))
@@ -66,7 +68,7 @@ def plot_map(geojson_feas, pth_wrk, mapbox_key):
     html_template = html_template.replace("{{zoom}}",str(15))
     html_template = html_template.replace("{{key}}",mapbox_key)
     
-    with open(os.path.join(pth_wrk,"_map.html"), "w") as f: print(html_template, file=f)
+    with open(pth_save, "w") as f: print(html_template, file=f)
     
     return True
     
