@@ -11,10 +11,9 @@ import gsv_depth_scraper.geom
 
 now = datetime.datetime.now()
 PANO_URL = 'http://maps.google.com/cbk?output=tile&panoid={panoid}&zoom={z}&x={x}&y={y}&key={key}&' + str(now.microsecond)
-STAT_URL = 'https://maps.googleapis.com/maps/api/staticmap?center=Berkeley,CA&zoom=14&size=400x400&key={key}'
+#STAT_URL = 'https://maps.googleapis.com/maps/api/staticmap?center=Berkeley,CA&zoom=14&size=400x400&key={key}'
 
 GSV_TILEDIM = 512
-GSV_PANODIM = 416
 GOOG_COPYRIGHT = "Google"
 
 #api_sign_secret = "LonEqRR9GhMC4S8cyJ5E0OvXCpg="
@@ -40,18 +39,24 @@ def load_panos_and_package_to_zip(pth_wrk, zipobj, fmt, limit=False):
 
     
 def plot_map(mapplot_data, pth_wrk, api_key):
+    
+    
     print("MAP PLOTTING IS A WORK IN PROGRESS")
     return False
-    print(mapplot_data)
-    stat_url = STAT_URL.format( key=api_key )
-    print(stat_url)
-    urllib.request.urlretrieve(stat_url, "plot.jpg")
     
     
-def panoid_to_img(panoid, api_key, zoom):
+    
+def panoid_to_img(panoid, api_key, zoom, size_img):
     w,h = 2**zoom, 2**(zoom-1)
-    img = Image.new("RGB", (w*GSV_PANODIM, h*GSV_PANODIM), "red")
-
+    dim = False
+    if size_img[0] == 13312: dim = 416
+    if size_img[0] == 16384: dim = 512
+    if not dim:
+        print("!!!! THIS PANO IS A STRANGE DIMENSION {}".format(panoid))
+        print("zoom:{}\t w,h: {}x{} \t image_size:{}x{}".format(zoom,w,h,size_img[0],size_img[1]))
+        return False
+        
+    img = Image.new("RGB", (w*dim, h*dim), "red")
     try:
         for y in range(h):
             for x in range(w):

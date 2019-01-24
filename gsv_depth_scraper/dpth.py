@@ -107,13 +107,16 @@ def panoid_to_depthinfo(panoid):
     try:
         raw_depth_map = json_data['model']['depth_map'] # get the base64 string of the depth map
         dm_data = decode_json(raw_depth_map) # open it and decode (but don't store)
+        
+        size_img = (int(json_data['Data']['image_width']), int(json_data['Data']['image_height']))
+        size_til = (int(json_data['Data']['tile_width']), int(json_data['Data']['tile_height']))
     except:
         print("The returned json could not be decoded")
         print(url_depthmap)
         print("status code: {}".format(r.status_code))
-        return False
+        return False, False, False
     
-    return json_data
+    return json_data, size_img, size_til
     '''
     metadata = {}
     metadata['lat'] = json_data['Location']['lat']

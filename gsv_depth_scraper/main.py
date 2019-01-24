@@ -19,10 +19,10 @@ def gjpts_to_panos(pth_geo, api_key, pth_wrk, name, zoom=3, fmt="png", delay=Fal
     
     mapplot_data = {}
     for n, panoid in enumerate(panoids):
-        pano_img = gsv_depth_scraper.pano.panoid_to_img(panoid, api_key, zoom)
+        dpth_inf, size_img, size_til = gsv_depth_scraper.dpth.panoid_to_depthinfo(panoid)
+        pano_img = gsv_depth_scraper.pano.panoid_to_img(panoid, api_key, zoom, size_img)
         if not pano_img: continue
-
-        dpth_inf = gsv_depth_scraper.dpth.panoid_to_depthinfo(panoid)
+        
         if pano_img and dpth_inf:
             #print("==== {} of {} \t{}\t{} planes\tmax_depth: {}".format(n, len(panoids), panoid, len(dpth_inf['planes']),max(dpth_inf['depth_map'])))
             print("==== {} of {} \t{}".format((n+1), len(panoids), panoid))
@@ -85,7 +85,7 @@ def panos_to_package(pth_wrk, pth_zip, name, do_tile=False, fmt="png", limit=Fal
         zipobj_tils.close()
 
     print("packaged {} depthpanos to {} from {}".format(pair_count, pth_zip, pth_wrk))
-    if not do_tile: print("TILES WERE NOT CUT")
+    if not do_tile: print("TILES WERE NOT CUT. Consider using the -do_tile argument?")
 
 
 def _prepare_working_directory(dir, name, delete_existing=False):
