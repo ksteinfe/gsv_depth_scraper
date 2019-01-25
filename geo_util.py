@@ -20,6 +20,7 @@ if __name__ == '__main__':
     ctr = (30.2049565,-81.6285211) #pickwick park
     ctr = (51.92885,4.46673) # blijdorp
     ctr = (37.7753407,-122.4362981) # alamo square
+    ctr = (40.7139572,-73.9514868) # willamsburg
     
     circular(ctr)
     
