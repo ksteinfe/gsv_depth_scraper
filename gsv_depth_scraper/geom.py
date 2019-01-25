@@ -53,7 +53,7 @@ def locs_to_geojson(locs):
 def plot_map(geojson_feas, pth_save, mapbox_key, popup_image=False):    
     html_template = False
     fname = 'map_noimg.html'
-    if popup_image: fname = 'map_img.html'
+    #if popup_image: fname = 'map_img.html' # loading so many large images crashes web browsers. disabling for now.
     with open(os.path.join(os.path.dirname(__file__),'..','templates',fname), 'r') as f:
         html_template = f.read()
     if not html_template:
