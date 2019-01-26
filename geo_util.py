@@ -14,15 +14,13 @@ def circular(ctr):
     feacoll = gsv_depth_scraper.geom.circular_grid(ctr,dimension,count)
     with open("out.geojson", 'w') as f: json.dump(feacoll, f, separators=(',', ':'))
 
-    
+
 if __name__ == '__main__':
-    
+
     ctr = (30.2049565,-81.6285211) #pickwick park
     ctr = (51.92885,4.46673) # blijdorp
     ctr = (37.7753407,-122.4362981) # alamo square
     ctr = (40.7139572,-73.9514868) # willamsburg
-    
+    ctr = (29.6479851,-82.3378642) # eastcampus gainesville
+
     circular(ctr)
-    
-    
-    
