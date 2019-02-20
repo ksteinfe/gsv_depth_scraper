@@ -97,7 +97,7 @@ def _rotate_equirectangular(img_src, rot=0):
     img_tar = Image.new(img_src.mode,img_src.size,color=None)
     fmt = img_src.format
     w,h = img_src.size
-    div = int(w/8) # amount to rotate
+    div = int(w/rot) # amount to rotate
 
     img_tar.paste( img_src.crop((0,0,div,h)), (w-div,0,w,h) )
     img_tar.paste( img_src.crop((div,0,w,h)), (0,0,w-div,h) )
